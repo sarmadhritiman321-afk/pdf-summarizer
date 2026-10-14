@@ -1,19 +1,5 @@
 name = "pdf-summarizer"
 type = "javascript"
-
-[env.production]
-routes = [
-  { pattern = "*", zone_name = "example.com" }
-]
-
-[build]
-command = "npm run build"
-cwd = "."
-
-[[env.production.routes]]
-pattern = "*"
-
-[env.production]
 compatibility_date = "2026-10-12"
 
 [assets]
