@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #0F1623;
+    color: #d8e0ef;
+    min-height: 100dvh;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a3654;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334f85;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid #2DD4BF;
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .reading-text {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #b0c0de;
+    max-width: 68ch;
+  }
+
+  .reading-text p + p {
+    margin-top: 1em;
+  }
+
+  .chapter-heading {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.2;
+    color: #f0f3f9;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-2.5 px-3 py-2 rounded text-sm text-ink-300 transition-colors duration-150;
+  }
+
+  .nav-item:hover {
+    @apply bg-slate-850 text-ink-100;
+  }
+
+  .nav-item.active {
+    @apply bg-slate-750 text-white;
+  }
+
+  .card {
+    @apply bg-slate-850 border border-slate-750 rounded-lg;
+  }
+
+  .tab-btn {
+    @apply px-4 py-2 text-sm font-medium rounded transition-colors duration-150;
+  }
+
+  .tab-btn.active {
+    @apply bg-teal text-ink-950;
+  }
+
+  .tab-btn:not(.active) {
+    @apply text-ink-300 hover:text-ink-100 hover:bg-slate-750;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-2xs font-medium;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-teal text-ink-950 font-medium rounded hover:bg-teal-dark transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 text-ink-300 font-medium rounded hover:text-ink-100 hover:bg-slate-850 transition-colors duration-150;
+  }
+}
