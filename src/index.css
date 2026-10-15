@@ -14,8 +14,15 @@
   }
 
   body {
-    background-color: #0F1623;
-    color: #d8e0ef;
+    background-color: #06110d;
+    background-image:
+      radial-gradient(900px 500px at 85% -10%, rgba(61, 190, 139, 0.12), transparent 60%),
+      radial-gradient(700px 400px at -10% 110%, rgba(46, 139, 87, 0.12), transparent 60%),
+      linear-gradient(rgba(95, 240, 176, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(95, 240, 176, 0.035) 1px, transparent 1px);
+    background-size: auto, auto, 36px 36px, 36px 36px;
+    background-attachment: fixed;
+    color: #d3eee3;
     min-height: 100dvh;
   }
 
@@ -32,16 +39,16 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2a3654;
+    background: #1d3a2f;
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #334f85;
+    background: #2e8b57;
   }
 
   /* Focus ring */
   :focus-visible {
-    outline: 2px solid #2DD4BF;
+    outline: 2px solid #3dbe8b;
     outline-offset: 2px;
     border-radius: 3px;
   }
@@ -59,7 +66,7 @@
   .reading-text {
     font-size: 1rem;
     line-height: 1.75;
-    color: #b0c0de;
+    color: #a9d6c3;
     max-width: 68ch;
   }
 
@@ -71,7 +78,7 @@
     font-family: 'DM Serif Display', Georgia, serif;
     font-size: clamp(1.5rem, 3vw, 2.25rem);
     line-height: 1.2;
-    color: #f0f3f9;
+    color: #effaf5;
     letter-spacing: -0.01em;
   }
 
@@ -101,6 +108,24 @@
 
   .tab-btn:not(.active) {
     @apply text-ink-300 hover:text-ink-100 hover:bg-slate-750;
+  }
+
+  .glass {
+    background: rgba(15, 38, 31, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(95, 240, 176, 0.16);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 8px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(95, 240, 176, 0.08);
+    border-radius: 0.75rem;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 24px rgba(95, 240, 176, 0.35);
+  }
+
+  .eyebrow {
+    @apply text-2xs font-medium uppercase text-teal;
+    letter-spacing: 0.22em;
   }
 
   .badge {

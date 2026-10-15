@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { BookText, Lightbulb, Microscope, HelpCircle, type LucideProps } from 'lucide-react'
 import type { ForwardRefExoticComponent, RefAttributes } from 'react'
+import type { ReactNode } from 'react'
 import type { Chapter, TabId } from '../types'
 
 interface ChapterReaderProps {
   chapter: Chapter
   chapterIndex: number
+  header?: ReactNode
 }
 
 type LucideIcon = ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>
@@ -17,11 +19,12 @@ const TABS: { id: TabId; label: string; Icon: LucideIcon }[] = [
   { id: 'questions', label: 'Questions', Icon: HelpCircle },
 ]
 
-export default function ChapterReader({ chapter, chapterIndex }: ChapterReaderProps) {
+export default function ChapterReader({ chapter, chapterIndex, header }: ChapterReaderProps) {
   const [activeTab, setActiveTab] = useState<TabId>('summary')
 
   return (
-    <article className="flex-1 min-w-0 overflow-y-auto px-8 py-8 animate-fade-in">
+    <article className="flex-1 min-w-0 overflow-y-auto px-5 sm:px-8 py-8 animate-fade-in">
+      {header}
       {/* Chapter header */}
       <header className="mb-8 pb-6 border-b border-slate-750">
         <p className="text-sm text-teal/80 mb-2 font-medium">Chapter {chapterIndex + 1}</p>
@@ -50,7 +53,7 @@ export default function ChapterReader({ chapter, chapterIndex }: ChapterReaderPr
       {/* Tab content */}
       <div className="animate-fade-in" key={activeTab}>
         {activeTab === 'summary' && (
-          <SummaryTab text={chapter.summary} />
+          <SummaryTab text={chapter.summary} ai={chapter.aiSummary} instruction={chapter.aiInstruction} />
         )}
         {activeTab === 'concepts' && (
           <ConceptsTab concepts={chapter.keyConceptsList} />
@@ -70,18 +73,34 @@ export default function ChapterReader({ chapter, chapterIndex }: ChapterReaderPr
 // Tab panels
 // ---------------------------------------------------------------------------
 
-function SummaryTab({ text }: { text: string }) {
+function SummaryTab({ text, ai, instruction }: { text: string; ai?: string; instruction?: string }) {
+  // New summaries are one sentence per line; older saved documents are one block of text.
+  const extractive = (text.includes('\n') ? text.split('\n') : text.split('. ')).filter(Boolean)
   return (
-    <div>
-      <p className="text-sm text-ink-400 mb-4">
-        Extracted from the most significant sentences in this chapter.
-      </p>
-      <div className="reading-text leading-reading">
-        {text.split('. ').filter(Boolean).map((sentence, i) => (
-          <p key={i} className="mb-3 last:mb-0">
-            {sentence.endsWith('.') ? sentence : sentence + '.'}
+    <div className="space-y-6">
+      {ai && (
+        <div className="glass p-5">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <span className="badge bg-teal/15 text-teal border border-teal/30">AI summary</span>
+            {instruction && <span className="text-2xs text-ink-400 truncate">“{instruction}”</span>}
+          </div>
+          <div className="reading-text whitespace-pre-wrap">{ai}</div>
+          <p className="text-2xs text-ink-500 mt-3">
+            Written by a small on-device model from this chapter’s key passages. Verify important points against the source below.
           </p>
-        ))}
+        </div>
+      )}
+      <div>
+        <p className="text-sm text-ink-400 mb-4">
+          {ai ? 'Key sentences taken directly from the source:' : 'Key sentences taken directly from the source. Switch on the AI engine above for a written summary.'}
+        </p>
+        <div className="reading-text leading-reading">
+          {extractive.map((sentence, i) => (
+            <p key={i} className="mb-3 last:mb-0">
+              {sentence.endsWith('.') ? sentence : sentence + '.'}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   )

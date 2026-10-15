@@ -45,7 +45,7 @@ export async function processPDF(
       pageStart: raw.pageStart,
       pageEnd: raw.pageEnd,
       rawText: raw.text,
-      summary: generateSummary(raw.text, 7),
+      summary: generateSummary(raw.text, 9),
       keyConceptsList: extractKeyConcepts(raw.text),
       criticalAnalysis: generateCriticalAnalysis(raw.text, raw.title),
       revisionQuestions: generateRevisionQuestions(raw.text),

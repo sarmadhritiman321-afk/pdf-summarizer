@@ -9,6 +9,8 @@ export interface Chapter {
   criticalAnalysis: string
   revisionQuestions: RevisionQuestion[]
   wordCount: number
+  aiSummary?: string
+  aiInstruction?: string
 }
 
 export interface KeyConcept {

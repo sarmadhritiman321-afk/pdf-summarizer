@@ -8,7 +8,7 @@ interface ChapterNavProps {
 
 export default function ChapterNav({ chapters, activeChapterId, onSelect }: ChapterNavProps) {
   return (
-    <nav className="w-56 shrink-0 border-r border-slate-750 h-full overflow-y-auto py-4 px-2">
+    <nav className="w-56 shrink-0 hidden md:block border-r border-slate-750 h-full overflow-y-auto py-4 px-2">
       <p className="text-2xs font-medium text-ink-400 uppercase tracking-wider px-2 mb-3">
         Chapters
       </p>

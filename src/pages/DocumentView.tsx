@@ -4,6 +4,9 @@ import { ArrowLeft } from 'lucide-react'
 import ChapterNav from '../components/ChapterNav'
 import ChapterReader from '../components/ChapterReader'
 import { getDocument } from '../lib/db'
+import { useAi } from '../ai/AiContext'
+import AiStatusPanel from '../components/AiStatusPanel'
+import InstructionBar from '../components/InstructionBar'
 import type { Document } from '../types'
 
 export default function DocumentView() {
@@ -11,10 +14,13 @@ export default function DocumentView() {
   const [doc, setDoc] = useState<Document | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeChapterId, setActiveChapterId] = useState<string>('')
+  const [instruction, setInstruction] = useState('')
+  const { tick, queueDocument } = useAi()
 
   useEffect(() => {
     if (!id) return
     setLoading(true)
+    setActiveChapterId('')
     getDocument(id).then((d) => {
       if (d) {
         setDoc(d)
@@ -23,6 +29,12 @@ export default function DocumentView() {
       setLoading(false)
     })
   }, [id])
+
+  // Quietly pick up AI summaries as they arrive (no spinner, keeps the chapter you are on)
+  useEffect(() => {
+    if (!id || tick === 0) return
+    getDocument(id).then((d) => { if (d) setDoc(d) })
+  }, [id, tick])
 
   if (loading) {
     return (
@@ -63,6 +75,19 @@ export default function DocumentView() {
         </span>
       </div>
 
+      <div className="md:hidden shrink-0 px-4 py-2 border-b border-slate-750">
+        <select
+          value={activeChapterId}
+          onChange={(e) => setActiveChapterId(e.target.value)}
+          className="w-full bg-slate-850 border border-slate-750 rounded px-2 py-1.5 text-sm text-white"
+          aria-label="Choose chapter"
+        >
+          {doc.chapters.map((c, i) => (
+            <option key={c.id} value={c.id}>{i + 1}. {c.title}</option>
+          ))}
+        </select>
+      </div>
+
       {/* Content area */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ChapterNav
@@ -75,7 +100,21 @@ export default function DocumentView() {
         />
 
         {activeChapter ? (
-          <ChapterReader chapter={activeChapter} chapterIndex={activeIndex} />
+          <ChapterReader
+            chapter={activeChapter}
+            chapterIndex={activeIndex}
+            header={
+              <div className="space-y-3 mb-8">
+                <InstructionBar
+                  value={instruction}
+                  onChange={setInstruction}
+                  onSubmit={() => queueDocument(doc.id, instruction)}
+                  submitLabel="Summarise with AI"
+                />
+                <AiStatusPanel />
+              </div>
+            }
+          />
         ) : (
           <div className="flex-1 flex items-center justify-center text-ink-400 text-sm">
             Select a chapter to begin reading.

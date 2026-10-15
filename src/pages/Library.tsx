@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Upload, BookOpen } from 'lucide-react'
 import DocumentCard from '../components/DocumentCard'
+import HowItWorks from '../components/HowItWorks'
+import AiStatusPanel from '../components/AiStatusPanel'
 import type { Document } from '../types'
 
 interface LibraryProps {
@@ -20,11 +22,12 @@ export default function Library({ documents, loading, onDelete }: LibraryProps) 
 
   return (
     <main className="flex-1 overflow-y-auto">
-      <div className="max-w-5xl mx-auto px-8 py-8">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8 py-8">
         {/* Header */}
         <div className="flex items-end justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-white tracking-tight">Library</h1>
+            <p className="eyebrow mb-2">Lumen · local study engine</p>
+            <h1 className="text-3xl font-semibold text-white tracking-tight glow-text">Library</h1>
             <p className="text-sm text-ink-400 mt-1">
               {documents.length === 0
                 ? 'No documents yet'
@@ -36,6 +39,8 @@ export default function Library({ documents, loading, onDelete }: LibraryProps) 
             Upload PDF
           </Link>
         </div>
+
+        <div className="mb-6 max-w-xl"><AiStatusPanel /></div>
 
         {/* Empty state */}
         {documents.length === 0 && (
@@ -62,6 +67,7 @@ export default function Library({ documents, loading, onDelete }: LibraryProps) 
             ))}
           </div>
         )}
+        <HowItWorks />
       </div>
     </main>
   )

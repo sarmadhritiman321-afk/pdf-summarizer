@@ -93,3 +93,17 @@ export async function deleteDocument(id: string): Promise<void> {
     console.error('Failed to delete document:', e)
   }
 }
+
+export async function setChapterAi(docId: string, chapterId: string, text: string, instruction: string): Promise<void> {
+  try {
+    const db = await getDB()
+    const meta = await db.get(STORE_DOCS, docId)
+    if (!meta) return
+    const chapters = meta.chapters.map((c) =>
+      c.id === chapterId ? { ...c, aiSummary: text, aiInstruction: instruction } : c
+    )
+    await db.put(STORE_DOCS, { ...meta, chapters })
+  } catch (e) {
+    console.error('Failed to save AI summary:', e)
+  }
+}

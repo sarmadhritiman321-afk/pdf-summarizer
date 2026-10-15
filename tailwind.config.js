@@ -5,27 +5,33 @@ export default {
     extend: {
       colors: {
         ink: {
-          DEFAULT: '#0F1623',
-          50: '#f0f3f9',
-          100: '#d8e0ef',
-          200: '#b0c0de',
-          300: '#7d96c4',
-          400: '#4e6ea6',
-          500: '#334f85',
-          600: '#243969',
-          700: '#192a52',
-          800: '#111d3a',
-          900: '#0F1623',
-          950: '#080d14',
+          DEFAULT: '#0a1814',
+          50: '#effaf5',
+          100: '#d3eee3',
+          200: '#a9d6c3',
+          300: '#7fbda6',
+          400: '#5f9d86',
+          500: '#3f7a66',
+          600: '#2c5a4a',
+          700: '#1f4034',
+          800: '#142d25',
+          900: '#0c1c17',
+          950: '#06110d',
         },
         slate: {
-          750: '#2a3654',
-          850: '#1a2440',
+          600: '#2f5a49',
+          750: '#1d3a2f',
+          850: '#0f261f',
         },
+        // "teal" keeps its name so existing classes still work; values are now sea green
         teal: {
-          DEFAULT: '#2DD4BF',
-          dark: '#0f9b8a',
-        }
+          DEFAULT: '#3dbe8b',
+          dark: '#2e8b57',
+        },
+        sea: {
+          DEFAULT: '#2e8b57',
+          glow: '#5ff0b0',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -44,6 +50,7 @@ export default {
         'fade-in': 'fadeIn 0.3s ease-out',
         'slide-up': 'slideUp 0.4s ease-out',
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
+        scan: 'scan 1.8s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -53,6 +60,10 @@ export default {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(12px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scan: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(250%)' },
         },
         pulseSoft: {
           '0%, 100%': { opacity: '0.6' },

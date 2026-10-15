@@ -57,22 +57,70 @@ function scoreText(text: string): Array<{ sentence: string; score: number }> {
 }
 
 // ---------------------------------------------------------------------------
-// Summary: top N sentences, in original document order
+// Summary: ranked sentences with redundancy elimination (MMR), in original order
 // ---------------------------------------------------------------------------
 
-export function generateSummary(text: string, targetSentences = 6): string {
+const CUE = /\b(therefore|thus|in (?:conclusion|summary|short)|defined as|refers to|means|held that|the court|must|shall|however|except|unless|provided that|in other words|for example|importantly)\b/i
+
+function contentSet(sentence: string): Set<string> {
+  return new Set(tokenize(sentence).filter((w) => !STOP_WORDS.has(w)))
+}
+
+function overlap(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 || b.size === 0) return 0
+  let inter = 0
+  a.forEach((w) => { if (b.has(w)) inter++ })
+  return inter / Math.min(a.size, b.size)
+}
+
+/** Pick the most informative, least repetitive sentences, returned in document order. */
+function rankSentences(text: string, maxSentences: number, maxWords: number): string[] {
   const scored = scoreText(text)
-  if (scored.length === 0) return 'No text could be extracted for this section.'
+  const n = scored.length
+  if (n === 0) return []
 
-  const limit = Math.min(targetSentences, Math.ceil(scored.length * 0.35))
-  const topIndices = scored
-    .map((s, i) => ({ ...s, i }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .sort((a, b) => a.i - b.i)
-    .map((s) => s.i)
+  const base = scored.map((s, i) => {
+    const words = s.sentence.split(' ').length
+    let score = s.score
+    if (i < n * 0.1) score *= 1.15            // openings state the topic
+    if (i > n * 0.95) score *= 1.05           // closings often conclude
+    if (CUE.test(s.sentence)) score *= 1.2    // definitions, holdings, qualifications
+    if (words < 8) score *= 0.5               // fragments
+    if (words > 60) score *= 0.7              // run-on extraction noise
+    return { i, sentence: s.sentence, score, set: contentSet(s.sentence), words }
+  })
 
-  return topIndices.map((i) => scored[i].sentence).join(' ')
+  const chosen: typeof base = []
+  let wordTotal = 0
+  const pool = [...base]
+  while (pool.length && chosen.length < maxSentences) {
+    let bestIdx = -1
+    let bestVal = -Infinity
+    for (let k = 0; k < pool.length; k++) {
+      const redundancy = chosen.length ? Math.max(...chosen.map((c) => overlap(pool[k].set, c.set))) : 0
+      const val = 0.72 * pool[k].score - 0.28 * redundancy * (pool[k].score || 1)
+      if (val > bestVal) { bestVal = val; bestIdx = k }
+    }
+    const pick = pool.splice(bestIdx, 1)[0]
+    if (wordTotal + pick.words > maxWords && chosen.length > 0) continue
+    chosen.push(pick)
+    wordTotal += pick.words
+  }
+  return chosen.sort((a, b) => a.i - b.i).map((c) => c.sentence)
+}
+
+export function generateSummary(text: string, targetSentences = 7): string {
+  const n = splitSentences(text).length
+  if (n === 0) return 'No text could be extracted for this section.'
+  const limit = Math.min(targetSentences, Math.max(3, Math.ceil(n * 0.3)))
+  return rankSentences(text, limit, 400).join('\n')
+}
+
+/** Source passages handed to the local language model: grounded, de-duplicated, capped in size. */
+export function selectPassages(text: string, maxWords = 650): string {
+  const n = splitSentences(text).length
+  if (n === 0) return ''
+  return rankSentences(text, Math.max(6, Math.ceil(n * 0.4)), maxWords).join(' ')
 }
 
 // ---------------------------------------------------------------------------

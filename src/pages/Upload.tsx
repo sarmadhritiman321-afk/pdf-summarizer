@@ -2,6 +2,10 @@ import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, AlertCircle } from 'lucide-react'
 import ProgressBar from '../components/ProgressBar'
+import AiStatusPanel from '../components/AiStatusPanel'
+import InstructionBar from '../components/InstructionBar'
+import HowItWorks from '../components/HowItWorks'
+import { useAi } from '../ai/AiContext'
 import { processPDF } from '../lib/processor'
 import type { Document, ProcessingStatus } from '../types'
 
@@ -47,6 +51,8 @@ export default function UploadPage({ onDocumentReady }: UploadPageProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+  const { queueDocument, hasConsented } = useAi()
+  const [instruction, setInstruction] = useState('')
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -65,13 +71,14 @@ export default function UploadPage({ onDocumentReady }: UploadPageProps) {
       try {
         const doc = await processPDF(file, setStatus)
         await onDocumentReady(doc)
+        if (instruction.trim() || hasConsented) queueDocument(doc.id, instruction)
         navigate(`/doc/${doc.id}`)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Something went wrong processing this PDF.'
         setStatus({ stage: 'error', message })
       }
     },
-    [onDocumentReady, navigate]
+    [onDocumentReady, navigate, instruction, hasConsented, queueDocument]
   )
 
   const onDrop = useCallback(
@@ -91,11 +98,16 @@ export default function UploadPage({ onDocumentReady }: UploadPageProps) {
 
   return (
     <main className="flex-1 overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-8 py-12">
-        <h1 className="text-2xl font-semibold text-white tracking-tight mb-1">Upload a PDF</h1>
+      <div className="max-w-2xl mx-auto px-5 sm:px-8 py-10">
+        <p className="eyebrow mb-2">New document</p>
+        <h1 className="text-3xl font-semibold text-white tracking-tight mb-1 glow-text">Upload a PDF</h1>
         <p className="text-ink-400 text-sm mb-8">
           Everything is processed in your browser — no file leaves your device.
         </p>
+
+        <div className="mb-5">
+          <InstructionBar value={instruction} onChange={setInstruction} disabled={isProcessing} />
+        </div>
 
         {/* Drop zone */}
         <div
@@ -165,6 +177,8 @@ export default function UploadPage({ onDocumentReady }: UploadPageProps) {
           </div>
         )}
 
+        <div className="mt-6"><AiStatusPanel /></div>
+
         {/* Tips */}
         {status.stage === 'idle' && (
           <div className="mt-8">
@@ -183,6 +197,7 @@ export default function UploadPage({ onDocumentReady }: UploadPageProps) {
             </ul>
           </div>
         )}
+        <HowItWorks />
       </div>
     </main>
   )

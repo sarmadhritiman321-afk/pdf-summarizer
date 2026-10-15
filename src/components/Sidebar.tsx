@@ -1,6 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { BookOpen, LayoutGrid, Upload, ChevronRight } from 'lucide-react'
 import type { Document } from '../types'
+import DinoIcon from '../game/DinoIcon'
+import { useGame } from '../game/GameContext'
 
 interface SidebarProps {
   documents: Document[]
@@ -14,9 +16,10 @@ function formatDate(ts: number): string {
 export default function Sidebar({ documents, activeDocId }: SidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { openGame } = useGame()
 
   return (
-    <aside className="w-64 shrink-0 flex flex-col bg-ink-950 border-r border-slate-750 h-dvh sticky top-0 overflow-hidden">
+    <aside className="w-64 shrink-0 hidden md:flex flex-col bg-ink-950/80 backdrop-blur border-r border-slate-750 h-dvh sticky top-0 overflow-hidden">
       {/* Logo */}
       <div className="px-5 py-4 border-b border-slate-750 shrink-0">
         <Link to="/" className="flex items-center gap-2.5 group">
@@ -79,6 +82,14 @@ export default function Sidebar({ documents, activeDocId }: SidebarProps) {
           </div>
         </div>
       )}
+
+      {/* Permanent game entry point */}
+      <div className="px-3 pb-3 shrink-0">
+        <button onClick={openGame} className="nav-item w-full border border-slate-750 hover:border-teal/40" aria-label="Open Dino Runner game">
+          <DinoIcon size={15} className="text-teal" />
+          Dino Runner
+        </button>
+      </div>
 
       {/* Footer */}
       <div className="px-5 py-3 border-t border-slate-750 shrink-0">
