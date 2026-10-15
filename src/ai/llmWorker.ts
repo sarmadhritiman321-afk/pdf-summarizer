@@ -4,6 +4,9 @@ import { pipeline, env } from '@huggingface/transformers'
 
 env.allowLocalModels = false
 env.useBrowserCache = true
+// Serve the ONNX runtime from this site instead of a third-party CDN, so one fewer host can be blocked.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(env.backends as any).onnx.wasm.wasmPaths = `${self.location.origin}/ort/`
 
 const ctx = self as unknown as {
   postMessage: (m: unknown) => void
@@ -93,6 +96,20 @@ ctx.onmessage = async (e: MessageEvent) => {
       post({ type: 'result', id: msg.id, text: String(text).trim() })
     }
   } catch (err) {
-    post({ type: 'error', id: msg.id, message: err instanceof Error ? err.message : String(err) })
+    let message = err instanceof Error ? err.message : String(err)
+    if (msg.type === 'load' && /fetch|network|load/i.test(message)) message = await diagnose(message)
+    post({ type: 'error', id: msg.id, message })
   }
+}
+
+// "Failed to fetch" says nothing useful, so find out which host this network is blocking.
+async function diagnose(original: string): Promise<string> {
+  const reach = async (url: string) => {
+    try { await fetch(url, { method: 'HEAD', mode: 'no-cors', cache: 'no-store' }); return true } catch { return false }
+  }
+  const hf = await reach('https://huggingface.co/onnx-community/Qwen2.5-0.5B-Instruct/resolve/main/config.json')
+  if (!hf) return 'Your network or browser is blocking huggingface.co, where the AI model files are hosted. Try another network (for example mobile data), turn off any VPN or ad/content blocker for this site, then try again.'
+  const cdn = await reach(`${self.location.origin}/ort/ort-wasm-simd-threaded.jsep.mjs`)
+  if (!cdn) return 'The AI runtime files could not be loaded from this site. Reload the page and try again.'
+  return `${original} (huggingface.co is reachable, so this may be a temporary network problem or low browser storage. Try again.)`
 }
